@@ -10,19 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Show runner config
       - name: Display configuration
         run: |
-          uname -a &&
-          cat /proc/cpuinfo | grep "model name"
-      
+          uname -a \
+          sudo lshw -C cpuinfo
+
+      # Self-explanatory
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Cache for faster build
       - uses: actions/cache@v3
         with:
           path: Li brary
           key: Library-$
 
+      # Actual build
       - uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -30,11 +34,13 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: WebGL
-
+  
+      # Zipping the build
       - name: Zip Build
         run: |
           zip -r WebGLBuild.zip build/WebGL
 
+      # Create release in the index
       - name: Create Release
         uses: actions/create-release@v1
         env:
@@ -47,28 +53,25 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Upload zipped binary to GH
+      - uses: actions/upload-artifact@v4
         with:
-          upload-url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./my_artifact.zip
-          asset_name: 
+          name: Build-${{ targetPlatform }}
+          path: build/${{ targetPlatform }}
 
-      - name: Install Butler
-        run: |
-          curl -L https://itch.io/api/downloads/butler/linux-amd64/latest -o butler.gz
-          gunzip butler.gz
-          chmod +x butler
-          sudo mv butler /usr/local/bin/butler
-
-      - name: Deploy to Itch.IO
-        run: |
-          echo "Pushing to itch.io"
-          butler push build/WebGL BastienSANTE/Coucou:html
-        env:
-          BUTLER_API_KEY : ${{ secrets.BUTLER_API_KEY }}
+      # Soon : Butler
+      #- name: Install Butler
+#        run: |
+#          curl -L https://itch.io/api/downloads/butler/linux-amd64/latest -o butler.gz
+#          gunzip butler.gz
+#          chmod +x butler
+#          sudo mv butler /usr/local/bin/butler
+#
+#     - name: Deploy to Itch.IO
+#        run: |
+#         echo "Pushing to itch.io"
+#          butler push build/WebGL BastienSANTE/Coucou:html
+#       env:
+#          BUTLER_API_KEY : ${{ secrets.BUTLER_API_KEY }}
 
           
