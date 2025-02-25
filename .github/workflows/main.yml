@@ -23,7 +23,8 @@ jobs:
     steps:
       - name: Display Configuration
         run: |
-          uname -a \
+          uname -a
+        run: |
           sudo lshw -C cpuinfo
     
       - name: Checkout
