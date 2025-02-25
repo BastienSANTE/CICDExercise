@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Display configuration
+        run: |
+          uname -a &&
+          cat /proc/cpuinfo | grep "model name"
+      
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -41,6 +46,16 @@ jobs:
             Lorem Ipsum Dolor Sit Amet
           draft: false
           prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload-url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./my_artifact.zip
+          asset_name: 
 
       - name: Install Butler
         run: |
