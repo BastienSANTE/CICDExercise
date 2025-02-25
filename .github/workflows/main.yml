@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Display Configuration
         run: |
-          uname -a && lshw -C cpuinfo
+          uname -a && cat /proc/cpuinfo
     
       - name: Checkout
         uses: actions/checkout@v4
