@@ -5,73 +5,47 @@ on:
   workflow_dispatch:
 
 jobs:
-  unity_build:
-    name: Build the project
+  build-and-deploy:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          # - StandaloneWindows # Build a Windows standalone.
+          # - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          # - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          # - iOS # Build an iOS player.
+          # - Android # Build an Android .apk standalone app.
+          - WebGL # WebGL.
+    
     steps:
-      # Show runner config
-      - name: Display configuration
-        run: |
-          uname -a \
-          sudo lshw -C cpuinfo
-
-      # Self-explanatory
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
 
-      # Cache for faster build
       - uses: actions/cache@v3
         with:
-          path: Li brary
-          key: Library-$
-
-      # Actual build
-      - uses: game-ci/unity-builder@v4
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: Library-
+          
+      - if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.3.1
+          
+      - name: Build
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: WebGL
-  
-      # Zipping the build
-      - name: Zip Build
-        run: |
-          zip -r WebGLBuild.zip build/WebGL
+          targetPlatform: ${{ matrix.targetPlatform }}
 
-      # Create release in the index
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: |
-            Lorem Ipsum Dolor Sit Amet
-          draft: false
-          prerelease: false
-
-      # Upload zipped binary to GH
       - uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ targetPlatform }}
-          path: build/${{ targetPlatform }}
-
-      # Soon : Butler
-      #- name: Install Butler
-#        run: |
-#          curl -L https://itch.io/api/downloads/butler/linux-amd64/latest -o butler.gz
-#          gunzip butler.gz
-#          chmod +x butler
-#          sudo mv butler /usr/local/bin/butler
-#
-#     - name: Deploy to Itch.IO
-#        run: |
-#         echo "Pushing to itch.io"
-#          butler push build/WebGL BastienSANTE/Coucou:html
-#       env:
-#          BUTLER_API_KEY : ${{ secrets.BUTLER_API_KEY }}
-
-          
+          name: Build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
