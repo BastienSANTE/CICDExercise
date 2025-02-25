@@ -28,7 +28,7 @@ jobs:
 
       - name: Zip Build
         run: |
-        zip -r WebGLBuild.zip build/WebGL
+          zip -r WebGLBuild.zip build/WebGL
 
       - name: Create Release
         uses: actions/create-release@v1
