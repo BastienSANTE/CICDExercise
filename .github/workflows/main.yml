@@ -21,6 +21,11 @@ jobs:
           - WebGL # WebGL.
     
     steps:
+      - name: Display Configuration
+        run: |
+          uname -a \
+          sudo lshw -C cpuinfo
+    
       - name: Checkout
         uses: actions/checkout@v4
         with:
