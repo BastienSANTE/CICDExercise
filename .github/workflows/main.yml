@@ -41,4 +41,17 @@ jobs:
             Lorem Ipsum Dolor Sit Amet
           draft: false
           prerelease: false
-          
+
+      - name: Install Butler
+        run: |
+          curl -L https://itch.io/api/downloads/butler/linux-amd64/latest -o butler.gz
+          gunzip butler.gz
+          chmod +x butler
+          sudo mv butler /usr/local/bin/butler
+
+      - name: Deploy to Itch.IO
+        run: |
+          echo "Pushing to itch.io"
+          butler push build/WebGL BastienSANTE/Coucou:html
+        env:
+          BUTLER_API_KEY : ${{ secrets.BUTLER_API_KEY }}
