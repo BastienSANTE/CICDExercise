@@ -23,9 +23,7 @@ jobs:
     steps:
       - name: Display Configuration
         run: |
-          uname -a
-        run: |
-          sudo lshw -C cpuinfo
+          uname -a && sudo lshw -C cpuinfo
     
       - name: Checkout
         uses: actions/checkout@v4
