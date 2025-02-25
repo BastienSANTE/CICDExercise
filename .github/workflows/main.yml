@@ -1,0 +1,35 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  unity_build:
+    name: Build the project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-$
+
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: WebGL
+
+      - name: Store Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build
+          path: build
+          
